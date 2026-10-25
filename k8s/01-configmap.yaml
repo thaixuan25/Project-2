@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: podinfo-config
+  namespace: prj2
+data:
+  PODINFO_UI_COLOR: "#2f6f4f"
+  PODINFO_UI_MESSAGE: "Do an 2 - Canary Deployment"
