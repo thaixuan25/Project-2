@@ -1,0 +1,10 @@
+dex:
+  enabled: false
+notifications:
+  enabled: false
+configs:
+  params:
+    server.insecure: true
+  cm:
+    timeout.reconciliation: 60s
+    timeout.reconciliation.jitter: 10s
