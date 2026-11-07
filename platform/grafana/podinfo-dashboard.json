@@ -1,0 +1,1437 @@
+{
+  "apiVersion": "dashboard.grafana.app/v2",
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "podinfo",
+    "namespace": "default",
+    "uid": "9596e031-610b-41f7-8ac8-7577f864f302",
+    "labels": {
+      "grafana.app/deprecatedInternalID": "2462390039478272"
+    },
+    "annotations": {
+      "grafana.app/createdBy": "user:bg3m0wl9k9vk0a",
+      "grafana.app/saved-from-ui": "Grafana v13.2.4 (0e79aef9d9)",
+      "grafana.app/updatedBy": "user:bg3m0wl9k9vk0a",
+      "grafana.app/updatedTimestamp": "2026-11-07T19:46:44Z",
+      "grafana.app/description": "Dashboard theo dõi Traffic, Errors, Latency và Infrastructure cho podinfo trong namespace prj2. Canary/Stable comparison cần metric label hoặc deployment riêng được instrument."
+    }
+  },
+  "spec": {
+    "annotations": [
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana",
+            "version": "v0",
+            "datasource": {
+              "name": "-- Grafana --"
+            },
+            "spec": {}
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "builtIn": true
+        }
+      }
+    ],
+    "cursorSync": "Off",
+    "editable": true,
+    "elements": {
+      "rps": {
+        "kind": "Panel",
+        "spec": {
+          "id": 1,
+          "title": "Request rate",
+          "description": "Tổng số request mỗi giây, loại trừ health check và metrics.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(rate(http_request_duration_seconds_count{namespace=\"prj2\", path!~\"healthz|readyz|metrics\"}[5m]))",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "reqps",
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 50
+                      },
+                      {
+                        "color": "red",
+                        "value": 100
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "errors": {
+        "kind": "Panel",
+        "spec": {
+          "id": 2,
+          "title": "HTTP 5xx error rate",
+          "description": "Tỷ lệ request HTTP 5xx trên tổng request. Hiển thị 0 khi chưa có request lỗi.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "100 * (sum(rate(http_request_duration_seconds_count{namespace=\"prj2\", path!~\"healthz|readyz|metrics\", status=~'5..'}[5m])) or vector(0)) / clamp_min(sum(rate(http_request_duration_seconds_count{namespace=\"prj2\", path!~\"healthz|readyz|metrics\"}[5m])), 1e-9)",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 1
+                      },
+                      {
+                        "color": "red",
+                        "value": 5
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "p95": {
+        "kind": "Panel",
+        "spec": {
+          "id": 3,
+          "title": "Latency P95",
+          "description": "Phân vị 95 của thời gian phản hồi HTTP.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{namespace=\"prj2\", path!~\"healthz|readyz|metrics\"}[5m])))",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 0.5
+                      },
+                      {
+                        "color": "red",
+                        "value": 1
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "replicas": {
+        "kind": "Panel",
+        "spec": {
+          "id": 4,
+          "title": "Available replicas",
+          "description": "Số replica podinfo đang khả dụng theo kube-state-metrics.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "kube_deployment_status_replicas_available{namespace=\"prj2\", deployment=\"podinfo\"}",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red",
+                        "value": null
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 1
+                      },
+                      {
+                        "color": "green",
+                        "value": 2
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "traffic": {
+        "kind": "Panel",
+        "spec": {
+          "id": 5,
+          "title": "Request throughput",
+          "description": "Lưu lượng request theo thời gian (requests/second).",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(rate(http_request_duration_seconds_count{namespace=\"prj2\", path!~\"healthz|readyz|metrics\"}[1m]))",
+                        "instant": false,
+                        "legendFormat": "Requests/sec",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "lastNotNull",
+                    "max"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "reqps",
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "latency": {
+        "kind": "Panel",
+        "spec": {
+          "id": 6,
+          "title": "Latency percentiles",
+          "description": "Theo dõi P50, P95 và P99 để quan sát độ trễ và tail latency.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{namespace=\"prj2\", path!~\"healthz|readyz|metrics\"}[5m])))",
+                        "instant": false,
+                        "legendFormat": "P50",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{namespace=\"prj2\", path!~\"healthz|readyz|metrics\"}[5m])))",
+                        "instant": false,
+                        "legendFormat": "P95",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{namespace=\"prj2\", path!~\"healthz|readyz|metrics\"}[5m])))",
+                        "instant": false,
+                        "legendFormat": "P99",
+                        "range": true
+                      }
+                    },
+                    "refId": "C",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "lastNotNull",
+                    "max"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "status": {
+        "kind": "Panel",
+        "spec": {
+          "id": 7,
+          "title": "HTTP response classes",
+          "description": "Request rate theo mã trạng thái HTTP. Cần label status trong metric.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (status) (rate(http_request_duration_seconds_count{namespace=\"prj2\", path!~\"healthz|readyz|metrics\"}[5m]))",
+                        "instant": false,
+                        "legendFormat": "{{status}}",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "lastNotNull",
+                    "max"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "reqps",
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "cpu": {
+        "kind": "Panel",
+        "spec": {
+          "id": 8,
+          "title": "Pod CPU usage",
+          "description": "Tổng CPU core đang sử dụng bởi container thuộc pod podinfo.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"prj2\", pod=~\"podinfo-.*\", container!=\"\", container!=\"POD\"}[5m]))",
+                        "instant": false,
+                        "legendFormat": "CPU cores",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "lastNotNull",
+                    "max"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "cores",
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "memory": {
+        "kind": "Panel",
+        "spec": {
+          "id": 9,
+          "title": "Pod memory usage",
+          "description": "Working set memory của các container podinfo.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(container_memory_working_set_bytes{namespace=\"prj2\", pod=~\"podinfo-.*\", container!=\"\", container!=\"POD\"})",
+                        "instant": false,
+                        "legendFormat": "Memory",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "lastNotNull",
+                    "max"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "bytes",
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "replica-trend": {
+        "kind": "Panel",
+        "spec": {
+          "id": 10,
+          "title": "Desired vs available replicas",
+          "description": "So sánh số replica mong muốn và số replica khả dụng của Deployment podinfo.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "kube_deployment_spec_replicas{namespace=\"prj2\", deployment=\"podinfo\"}",
+                        "instant": false,
+                        "legendFormat": "Desired",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "kube_deployment_status_replicas_available{namespace=\"prj2\", deployment=\"podinfo\"}",
+                        "instant": false,
+                        "legendFormat": "Available",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "lastNotNull",
+                    "max"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "restarts": {
+        "kind": "Panel",
+        "spec": {
+          "id": 11,
+          "title": "Container restarts",
+          "description": "Tổng số lần restart tích lũy của container trong pod podinfo.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"prj2\", pod=~\"podinfo-.*\"}[1h]))",
+                        "instant": false,
+                        "legendFormat": "Restarts / 1h",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "13.2.4",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "lastNotNull",
+                    "max"
+                  ],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "lineWidth": 2,
+                    "fillOpacity": 12,
+                    "gradientMode": "opacity",
+                    "spanNulls": false,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    },
+                    "axisPlacement": "auto",
+                    "axisLabel": "",
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "hideFrom": {
+                      "tooltip": false,
+                      "viz": false,
+                      "legend": false
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 5,
+              "element": {
+                "kind": "ElementReference",
+                "name": "rps"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 5,
+              "element": {
+                "kind": "ElementReference",
+                "name": "errors"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 5,
+              "element": {
+                "kind": "ElementReference",
+                "name": "p95"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 5,
+              "element": {
+                "kind": "ElementReference",
+                "name": "replicas"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "traffic"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 13,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "latency"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 21,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "status"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 29,
+              "width": 6,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "cpu"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 6,
+              "y": 29,
+              "width": 6,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "memory"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 37,
+              "width": 6,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "replica-trend"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 6,
+              "y": 37,
+              "width": 6,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "restarts"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "links": [],
+    "liveNow": false,
+    "preload": false,
+    "tags": [
+      "podinfo",
+      "canary",
+      "sre",
+      "golden-signals"
+    ],
+    "timeSettings": {
+      "timezone": "browser",
+      "from": "now-3h",
+      "to": "now",
+      "autoRefresh": "30s",
+      "autoRefreshIntervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "hideTimepicker": false,
+      "fiscalYearStartMonth": 0
+    },
+    "title": "Podinfo | Canary Deployment Monitoring",
+    "variables": [],
+    "preferences": {
+      "layout": {
+        "kind": "GridLayout",
+        "spec": {
+          "items": []
+        }
+      }
+    },
+    "description": "Theo dõi bốn tín hiệu chính cho thử nghiệm Canary: Traffic, Errors, Latency và Infrastructure. Dashboard hiện dùng deployment podinfo hiện tại; chưa giả định có nhãn Stable/Canary."
+  }
+}
