@@ -1,19 +1,14 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: podinfo
   namespace: prj2
   labels:
     app: podinfo
 spec:
-  replicas: 3
+  replicas: 5
   revisionHistoryLimit: 5
   minReadySeconds: 5
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
   selector:
     matchLabels:
       app: podinfo
@@ -23,7 +18,7 @@ spec:
         app: podinfo
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "9898"
+        prometheus.io/port: "9797"
     spec:
       containers:
         - name: podinfod
@@ -31,9 +26,14 @@ spec:
           ports:
             - name: http
               containerPort: 9898
+            - name: http-metrics
+              containerPort: 9797
           envFrom:
             - configMapRef:
                 name: podinfo-config
+          env:
+            - name: PODINFO_PORT_METRICS
+              value: "9797"
           readinessProbe:
             httpGet:
               path: /readyz
@@ -43,7 +43,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: http
+              port: http-metrics
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:
@@ -52,3 +52,16 @@ spec:
               memory: 32Mi
             limits:
               memory: 128Mi
+  strategy:
+    canary:
+      maxSurge: 1
+      maxUnavailable: 0
+      steps:
+        - setWeight: 20
+        - pause: {}
+        - setWeight: 40
+        - pause: {duration: 1m}
+        - setWeight: 60
+        - pause: {duration: 1m}
+        - setWeight: 80
+        - pause: {duration: 1m}

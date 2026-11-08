@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - 00-namespace.yaml
   - 01-configmap.yaml
-  - 02-deployment.yaml
+  - 02-rollout.yaml
   - 03-service.yaml
   - 04-ingress.yaml
 images:
