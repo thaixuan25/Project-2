@@ -8,4 +8,4 @@ resources:
 - 04-ingress.yaml
 images:
 - name: ghcr.io/thaixuan25/podinfo
-  newTag: sha-036e80a
+  newTag: sha-a2f0ff5
