@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
   name: podinfo-canary
-  namespace: doan2
+  namespace: prj2
 spec:
   args:
     - name: canary-hash
